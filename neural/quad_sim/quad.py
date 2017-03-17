@@ -61,6 +61,8 @@ class Quadcopter(object):
 		self.moments[2] = self.variables['I_Z']
 		self.timestep = self.variables['timestep']
 
+		self.logging = False
+
 	def print_variables(self):
 		print self.variables
 
@@ -73,6 +75,8 @@ class Quadcopter(object):
 	def step(self):
 		self.update_kinematics()
 		self.time = self.time + self.timestep
+		if self.logging:
+			self.print_log()
 
 	def update_kinematics(self):
 		# Thrust calc #####################################
@@ -85,18 +89,19 @@ class Quadcopter(object):
 		moment_arm = math.sqrt(2) * self.variables['arm_length']
 		# Calculate the forces on the quad in each axis (Nm)
 		# X
-		self.torques[0] = (self.thrust[0] + self.thrust[3]) / moment_arm
+		self.torques[0] = ((self.thrust[0] + self.thrust[3])-(self.thrust[1] + self.thrust[2])) / moment_arm
 		# Y 
-		self.torques[1] = (self.thrust[0] + self.thrust[1]) / moment_arm
+		self.torques[1] = ((self.thrust[2] + self.thrust[3])-(self.thrust[0] + self.thrust[1])) / moment_arm
 		# Z
 		# First we have to calculate the torque on the vehicle as a result of each of the motors
 		# then, we just sum them to get the torque on the vehicle about the Z axis
 		for motor in range(0,4):
-			T = self.throttle[n]
-			self.motor_torques[n] = eval(self.torque_curve)
+			T = self.throttle[motor]
+			self.motor_torques[motor] = eval(self.torque_curve)
 		# Invert the torques from motors 1 and 3 since they spin counter clockwise
-		self.motor_torques[1] *= 1
-		self.motor_torques[3] *= 1
+		self.motor_torques[1] *= -1
+		1
+		self.motor_torques[3] *= -1
 
 		self.torques[2] = sum(self.motor_torques)
 		
@@ -120,3 +125,24 @@ class Quadcopter(object):
 		print self.alpha
 		print "Rates",
 		print self.rates
+
+	def print_log(self):
+		self.logfile.write(str(self.time)),
+		self.logfile.write(','),
+		self.logfile.write(str(self.angles[0])),
+		self.logfile.write(','),
+		self.logfile.write(str(self.angles[1])),
+		self.logfile.write(','),
+		self.logfile.write(str(self.angles[2])),
+		self.logfile.write('\n')
+
+	def log(self, filename):
+		self.logfile = file(filename, 'w')
+		self.logging = True
+
+	def close_log(self):
+		self.logging = False
+		self.logfile.close()
+
+	def get_angles(self):
+		return self.angles
