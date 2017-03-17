@@ -104,5 +104,19 @@ class Quadcopter(object):
 		# Angular calculations ############################
 		for n in range(0,3):
 			self.alpha[n] = self.torques[n]/self.moments[n]
-			self.rates[n] = self.rates[n] + (self.alpha[n]/self.timestep)
-			self.angles[n] = self.angles[n] + (self.rates[n]/self.timestep)
+			self.rates[n] = self.rates[n] + (self.alpha[n]*self.timestep)
+			self.angles[n] = self.angles[n] + (self.rates[n]*self.timestep)
+
+	def print_kinematics(self):
+		print "Throttles:",
+		print self.throttle
+		print "Thrusts:",
+		print self.thrust
+		print "Motor Torques:",
+		print self.motor_torques
+		print "Body torques:",
+		print self.torques
+		print "Alpha",
+		print self.alpha
+		print "Rates",
+		print self.rates
