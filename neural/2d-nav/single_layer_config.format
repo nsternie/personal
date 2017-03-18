@@ -1,0 +1,9 @@
+# Format of stand
+num_inputs
+num_neurons
+num_outputs
+weights of neuron[0]
+weights of neuron[1]
+weights of neuron[2]
+...
+weights of neuron[n]
