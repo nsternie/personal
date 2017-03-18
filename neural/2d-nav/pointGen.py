@@ -20,6 +20,6 @@ def generate(lower, upper):
 
 	return out
 
-# Future me: turns out you have to close and reopen it for an update
+# Future me: turns out you have to close and reopen python for an update
 # to a module to be recognized. (You spend 20 minutes debugging a non
 # existant problem while writing this)
