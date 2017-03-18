@@ -1,4 +1,4 @@
-# Format of stand
+# Format of standard singe hidder layer neural net
 num_inputs
 num_neurons
 num_outputs
@@ -7,3 +7,7 @@ weights of neuron[1]
 weights of neuron[2]
 ...
 weights of neuron[n]
+bias of neuron[0]
+bias of neuron[1]
+...
+bias of neuron[n]
