@@ -1,6 +1,4 @@
 activation-function-(of 'z')	val
-inputs							val
-outputs							val
 layers							val
 size-of-layer-0					val
 size-of-layer-1					val
@@ -9,9 +7,9 @@ size-of-layer-n					val
 ouput-weights-of-out[0] 		val
 ...								...
 ouput-weights-of-out[n] 		val
-weights-of-layer-0				val
+weights-of-layer-1				val
 ...								...
 weights-of-layer-n				val
-biases-of-layer-0				val
+biases-of-layer-1				val
 ....							...
 biases-of-layer-n				val

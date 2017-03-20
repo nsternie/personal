@@ -9,10 +9,10 @@ neurons = []
 
 ##################################
 # Configuration
-num_neurons = 5			# How many neurons will be used in the neural network
+num_neurons = 1000			# How many neurons will be used in the neural network
 iterations = 100
 test_cases = 100000
-weight_range = 5
+weight_range = 10
 bias_range = 20
 ##################################
 
