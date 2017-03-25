@@ -1,0 +1,1 @@
+bpy.data.objects["Sphere"].data.vertices[0].co.x += 1.0

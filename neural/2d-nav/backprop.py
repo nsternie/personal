@@ -26,7 +26,8 @@ for n in range(0, num_outputs):
 	random_array = []
 	for r in range(0, num_neurons):
 		random_array.append(random.uniform(-weight_range, weight_range))
-	output_neurons.append(random_array)
+	output_neurons.append(racmd
+		ndom_array)
 
 
 
@@ -49,3 +50,9 @@ for gen in range(0, generations):
 		output_errors_x.append(output_neurons[0].out - raw[4])
 		output_errors_y.append(output_neurons[1].out - raw[5])
 
+	hidden_weights = []
+	for n in hidden_neurons:
+		hidden_weights.append(n.weights)
+	output_weights = []
+	for n in output_neurons:
+		output_weights.append(n.weights)
