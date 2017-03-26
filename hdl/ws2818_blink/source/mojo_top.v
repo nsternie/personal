@@ -22,9 +22,10 @@ wire rst = ~rst_n; // make reset active high
 ///////// WIRE DECLARATIONS   /////////////////////////////////
 wire flash_trigger;           // Triggers the main loop
 wire [31:0] division_ratio;   // What is fed into the main clock divider module
-reg ready, load, ws_reset;    // Register for controlling ws module
-
-///////// END WIRE DECLARATIONS ///////////////////////////////
+reg load, ws_reset;           // Register for controlling ws module
+wire ready;                   // ^
+                              //
+/////// END WIRE DECLARATIONS /////////////////////////////////
 ///////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////
@@ -32,16 +33,17 @@ reg ready, load, ws_reset;    // Register for controlling ws module
 ///////////////////////////////////////////////////////////////
 
 // Color that will be flashing
-parameter red = 8'b00111111;
-parameter green = 8'b00111111;
-parameter blue = 8'b00111111;
-parameter off = 8'b00000000;
+reg [23:0] command;
+// 8 bit red, 8 bit green, 8 bit blue
+parameter on = 24'b001111110011111100111111;
+parameter off = 24'b000000000000000000000000;
 // Number of LEDs in the active strip
 parameter num_leds = 10;
 
 // Frequency of the flashing of the strip
-wire freq;
-assign freq = io_dip[23:0]; 
+wire [31:0]freq;
+assign freq[31:8] = io_dip[23:0];
+assign freq[7:0] = 255;
 
 ///////////////////////////////////////////////////////////////
 //////////    END CONFIGURATION SECTION    ////////////////////
@@ -51,7 +53,7 @@ assign freq = io_dip[23:0];
 assign division_ratio = freq; // for now  
 clock_divider cd1(clk, rst, division_ratio, flash_trigger);
 // ws2812 diver module
-ws2812 ws1(clk, rst, red, green, blue, load, ws_reset, dataline, ready);
+ws2812 ws1(clk, rst, command[23:16], command[15:8], command[7:0], load, ws_reset, dataline, ready);
 
 reg strip_state;
 parameter STRIP_ON = 1;
@@ -65,9 +67,9 @@ always @ (flash_trigger) begin
 end // flash_trigger
 
 // Variables used in main loop
-reg [7:0] active_led;
+reg [7:0] led_index;
 // States for main state machine  
-reg [4:0] state;
+reg [4:0] state, next_state;
 parameter IDLE = 0;
 parameter WRITE_LED = 1;
 parameter RESET = 2;
@@ -75,13 +77,42 @@ parameter RESET = 2;
 always @ (posedge clk) begin
   if (rst) begin
     // Reset e'rythang
+    state <= IDLE;
+    led_index <= 0;
+    load <= 0;
+    ws_reset <= 0;
+    command <= off;
   end else if (ready) begin
+    // Determine if strip is on or off
+    if (strip_state) begin
+      command <= off;
+    end else begin
+      command <= on;
+    end
+    
     case (state) 
-      IDLE : do=this;
+      IDLE : begin
+        load <= 1;
+        next_state <= WRITE_LED;
+      end
+      WRITE_LED : begin
+        load <= 1;
+        if (led_index == num_leds) next_state <= RESET;
+        else next_state <= WRITE_LED;
+        led_index <= led_index + 1;
+      end  
+      RESET : begin
+        led_index <= 0;
+        load <= 1;
+        ws_reset <= 1;
+      end
     endcase
   end else begin
-  
+    load <= 0;
+    ws_reset <= 0;
   end
+  
+  state <= next_state;
 
 end // posedge clk
 
