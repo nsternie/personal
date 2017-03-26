@@ -1,9 +1,89 @@
+// ws2812_blink
+// Nick Sterenberg
+// 3/25/2017
+// 
+// This projects reads in a "Set frequency" from up to 24 switch 
+// inputs on the mojo shield. This then blinks a led strip consisting
+// of ws2812 leds. This may seem like a random thing to do. It is. 
+// The idea came from listening to a radiolab podcast entitled 
+// "Bringing Gamma Back", and I was bored.
+
 module mojo_top(
     input clk,
-    input rst_n
+    input rst_n,
+    
+    input [23:0] io_dip,
+    output dataline
     );
 
 wire rst = ~rst_n; // make reset active high
+
+///////////////////////////////////////////////////////////////
+///////// WIRE DECLARATIONS   /////////////////////////////////
+wire flash_trigger;           // Triggers the main loop
+wire [31:0] division_ratio;   // What is fed into the main clock divider module
+reg ready, load, ws_reset;    // Register for controlling ws module
+
+///////// END WIRE DECLARATIONS ///////////////////////////////
+///////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////
+//////////    CONFIGURATION SECTION    ////////////////////////
+///////////////////////////////////////////////////////////////
+
+// Color that will be flashing
+parameter red = 8'b00111111;
+parameter green = 8'b00111111;
+parameter blue = 8'b00111111;
+parameter off = 8'b00000000;
+// Number of LEDs in the active strip
+parameter num_leds = 10;
+
+// Frequency of the flashing of the strip
+wire freq;
+assign freq = io_dip[23:0]; 
+
+///////////////////////////////////////////////////////////////
+//////////    END CONFIGURATION SECTION    ////////////////////
+///////////////////////////////////////////////////////////////
+
+// Clock divider that will trigger the flash
+assign division_ratio = freq; // for now  
+clock_divider cd1(clk, rst, division_ratio, flash_trigger);
+// ws2812 diver module
+ws2812 ws1(clk, rst, red, green, blue, load, ws_reset, dataline, ready);
+
+reg strip_state;
+parameter STRIP_ON = 1;
+parameter STRIP_OFF = 0;
+always @ (flash_trigger) begin
+  if (flash_trigger) begin
+    strip_state <= STRIP_OFF;
+  end else begin
+    strip_state <= STRIP_OFF;
+  end
+end // flash_trigger
+
+// Variables used in main loop
+reg [7:0] active_led;
+// States for main state machine  
+reg [4:0] state;
+parameter IDLE = 0;
+parameter WRITE_LED = 1;
+parameter RESET = 2;
+// Main loop to trigger update of the led strip
+always @ (posedge clk) begin
+  if (rst) begin
+    // Reset e'rythang
+  end else if (ready) begin
+    case (state) 
+      IDLE : do=this;
+    endcase
+  end else begin
+  
+  end
+
+end // posedge clk
 
 endmodule // top
 
