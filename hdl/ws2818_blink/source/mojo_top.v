@@ -13,6 +13,8 @@ module mojo_top(
     input rst_n,
     
     input [23:0] io_dip,
+    output [23:0] io_led,
+    output [7:0] led,
     output dataline
     );
 
@@ -55,14 +57,11 @@ clock_divider cd1(clk, rst, division_ratio, flash_trigger);
 // ws2812 diver module
 ws2812 ws1(clk, rst, command[23:16], command[15:8], command[7:0], load, ws_reset, dataline, ready);
 
-reg strip_state;
-parameter STRIP_ON = 1;
-parameter STRIP_OFF = 0;
 always @ (flash_trigger) begin
   if (flash_trigger) begin
-    strip_state <= STRIP_OFF;
+    command <= on;
   end else begin
-    strip_state <= STRIP_OFF;
+    command <= off;
   end
 end // flash_trigger
 
@@ -70,26 +69,26 @@ end // flash_trigger
 reg [7:0] led_index;
 // States for main state machine  
 reg [4:0] state, next_state;
+assign led[4:0] = state;
+assign led[7] = ready;
+assign led[6] = ws_reset;
+assign led[5] = load;
+assign io_led = command;
 parameter IDLE = 0;
 parameter WRITE_LED = 1;
 parameter RESET = 2;
-// Main loop to trigger update of the led strip
+
+// Main loop
 always @ (posedge clk) begin
   if (rst) begin
     // Reset e'rythang
     state <= IDLE;
+    next_state <= IDLE;
     led_index <= 0;
     load <= 0;
     ws_reset <= 0;
-    command <= off;
   end else if (ready) begin
     // Determine if strip is on or off
-    if (strip_state) begin
-      command <= off;
-    end else begin
-      command <= on;
-    end
-    
     case (state) 
       IDLE : begin
         load <= 1;
@@ -97,7 +96,7 @@ always @ (posedge clk) begin
       end
       WRITE_LED : begin
         load <= 1;
-        if (led_index == num_leds) next_state <= RESET;
+        if (led_index >= num_leds) next_state <= RESET;
         else next_state <= WRITE_LED;
         led_index <= led_index + 1;
       end  
@@ -105,14 +104,15 @@ always @ (posedge clk) begin
         led_index <= 0;
         load <= 1;
         ws_reset <= 1;
+        next_state <= IDLE;
       end
     endcase
+    state <= next_state;
   end else begin
     load <= 0;
     ws_reset <= 0;
+    state <= next_state;
   end
-  
-  state <= next_state;
 
 end // posedge clk
 
@@ -137,7 +137,7 @@ parameter WS_RST     = 3'b011;
 reg [2:0] state;
 
 // Clock delay targets, defines pulses
-parameter RESET_TICKS = 3000;  // 20ns per tick
+parameter RESET_TICKS = 3000;  // 20ns per tick with 50MHz clock
 parameter ONE_HIGH_TICKS = 40;
 parameter ONE_LOW_TICKS = 22;
 parameter ZERO_HIGH_TICKS = 20;
@@ -250,10 +250,10 @@ module clock_divider(
 reg [31:0] counter;
     
 always @ (posedge clk_in) begin
-  //if (rst) begin
-    //clk_out <= 0;
-    //counter <= 0;
-  //end else 
+  if (rst) begin
+    clk_out <= 0;
+    counter <= 0;
+  end else 
   if (counter == divisor) begin
     clk_out <= ~clk_out;
     counter <= 0;
