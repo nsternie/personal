@@ -15,7 +15,7 @@ module mojo_top(
     input [23:0] io_dip,
     output [23:0] io_led,
     output [7:0] led,
-    output dataline
+    output data_out
     );
 
 wire rst = ~rst_n; // make reset active high
@@ -55,7 +55,7 @@ assign freq[7:0] = 255;
 assign division_ratio = freq; // for now  
 clock_divider cd1(clk, rst, division_ratio, flash_trigger);
 // ws2812 diver module
-ws2812 ws1(clk, rst, command[23:16], command[15:8], command[7:0], load, ws_reset, dataline, ready);
+ws2812 ws1(clk, rst, command[23:16], command[15:8], command[7:0], load, ws_reset, data_out, ready);
 
 always @ (flash_trigger) begin
   if (flash_trigger) begin
@@ -87,7 +87,7 @@ always @ (posedge clk) begin
     led_index <= 0;
     load <= 0;
     ws_reset <= 0;
-  end else if (ready) begin
+  end else if (ready == 1) begin
     // Determine if strip is on or off
     case (state) 
       IDLE : begin
@@ -152,6 +152,7 @@ reg [31:0] data_index;
 reg [31:0] counter_target;
 
 always @ (posedge clk) begin
+  
   if (rst) begin
     state <= IDLE;
     ready <= 0;
