@@ -40,12 +40,13 @@ reg [23:0] command;
 parameter on = 24'b001111110011111100111111;
 parameter off = 24'b000000000000000000000000;
 // Number of LEDs in the active strip
-parameter num_leds = 10;
+wire [7:0] num_leds;
+assign num_leds = io_dip[7:0];
 
 // Frequency of the flashing of the strip
 wire [31:0]freq;
-assign freq[31:8] = io_dip[23:0];
-assign freq[7:0] = 255;
+assign freq = 32'b00000000000010011000100101101000;
+
 
 ///////////////////////////////////////////////////////////////
 //////////    END CONFIGURATION SECTION    ////////////////////
@@ -84,7 +85,7 @@ always @ (posedge clk) begin
     // Reset e'rythang
     state <= IDLE;
     next_state <= IDLE;
-    led_index <= 0;
+    led_index <= 1;
     load <= 0;
     ws_reset <= 0;
   end else if (ready == 1) begin
@@ -96,12 +97,12 @@ always @ (posedge clk) begin
       end
       WRITE_LED : begin
         load <= 1;
-        if (led_index >= num_leds) next_state <= RESET;
+        if (led_index >= (num_leds-1)) next_state <= RESET;
         else next_state <= WRITE_LED;
         led_index <= led_index + 1;
       end  
       RESET : begin
-        led_index <= 0;
+        led_index <= 1;
         load <= 1;
         ws_reset <= 1;
         next_state <= IDLE;
