@@ -2,14 +2,17 @@ import serial
 import time
 import os
 import math
+import matplotlib.pyplot as plt
 
 class plot:
 
 	def __init__(self):
 		self.active_file = ''
 		self.data_start_line = 0
-		self.datafile_array = []
 		self.channel_data = {}
+		self.units = {}
+		self.num_lines = 0
+		self.timebase = 'units'
 		#self.time_a = 0
 
 	def load(self, filename):
@@ -17,10 +20,10 @@ class plot:
 		file = open(self.active_file)
 
 		line_counter = 0
-		data_start = 0
 		data_in = []
+		datafile_array = []
 
-		## Parses file into a 2d array, [column][row]
+		## Parses file into a 2d array, [row][column]
 		for line in file:
 
 			if(line.count('##### Start Data #####')):
@@ -28,19 +31,36 @@ class plot:
 			line_counter = line_counter + 1
 
 			## For a tsv file
-			self.datafile_array.append(line.split('\t'))
+			datafile_array.append(line.split('\t'))
 		
-		## Datafile header parsing
-		self.channel_data['index'] = self.datafile_array[1:][0]
-		self.channel_data['name'] = self.datafile_array[1:][1]
-		self.channel_data['unit'] = self.datafile_array[1:][2]
+		self.num_lines = line_counter
+		self.channel_names = datafile_array[1][1:]
+		
+		for channel in self.channel_names:
+			self.channel_data[channel] = []
+		n = 1
+		for channel in self.channel_names:
+			self.units[channel] = datafile_array[2][n]
+			for m in range(self.data_start_line, self.num_lines):
+				self.channel_data[channel].append(datafile_array[m][n])
+			n = n + 1
 
+		self.units['time'] = 'microseconds'
+		self.channel_data['time'] = []
+		for m in range(self.data_start_line, self.num_lines):
+			self.channel_data['time'].append(datafile_array[m][0])
+
+		self.timebase = datafile_array[3][1]
 
 		print(self.active_file, "loaded")
 		file.close()
 
-	def plot_channel(self, channel_name):
-		print('todo')
+	def plot_single_channel(self, channel_name):
+		plt.plot(self.channel_data['time'], self.channel_data[channel_name])
+		plt.xlabel('Time, '+self.timebase)
+		plt.ylabel(self.units[channel_name])
+		plt.title(channel_name)
+		plt.show()
 
 
 class stream:
@@ -79,8 +99,13 @@ class stream:
 	def read_buffer(self, timeout):
 		
 		## There is a packet to read
-		if (self.ser.in_waiting>0):
-			print('ayo')
+		if (self.ser.in_waiting>self.packet_length):
+		#	while(self.ser.in_waiting>self.packet_length and not self.ser.read(size=1)==0)
+
+			self.stuffed_packet = []
+			for n in range(0, self.packet_length):
+				self.stuffed_pcket = self.ser.read(size=self.packet_length)
+
 		else:
 			print('buffer is empty')
 
