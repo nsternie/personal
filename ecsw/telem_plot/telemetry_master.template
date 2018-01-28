@@ -1,0 +1,22 @@
+Name	Bit Start	Bit End	Signed?	Counts to Volts	Volts to Unit	Unit
+valve_states	0	15	0	1	1	null
+e_vlv0	16	27	0	1	1	Volts
+e_vlv1	28	39	0	1	1	Volts
+e_vlv2	40	51	0	1	1	Volts
+e_vlv3	52	63	0	1	1	Volts
+e_vlv4	64	75	0	1	1	Volts
+e_vlv5	76	87	0	1	1	Volts
+e_vlv6	88	99	0	1	1	Volts
+e_vlv7	100	111	0	1	1	Volts
+e_vlv8	112	123	0	1	1	Volts
+e_vlv9	124	135	0	1	1	Volts
+e_vlv10	136	147	0	1	1	Volts
+e_vlv11	148	159	0	1	1	Volts
+e_vlv12	160	171	0	1	1	Volts
+e_vlv13	172	183	0	1	1	Volts
+e_vlv14	184	195	0	1	1	Volts
+e_vlv15	196	207	0	1	1	Volts
+i_vlv0	208	219	0	1	1	Amps
+i_vlv1	220	231	0	1	1	Amps
+i_vlv2	232	243	0	1	1	Amps
+i_vlv3	244	255	0	1	1	Amps

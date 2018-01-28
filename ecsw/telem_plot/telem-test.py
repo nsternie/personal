@@ -2,20 +2,18 @@ import telemtools
 import time
 import os
 
-s = telemtools.stream(port='COM12', baudrate=115200)
+if (0):
+	s = telemtools.stream(port='COM12', baudrate=115200)
+	s.load_template(file='telemetry_master.template')
 
-s.load_template(file='telemetry_master.template')
+if (1):
+	p = telemtools.plot()
+	p.load('test.tsv')
 
-p = telemtools.plot()
-p.load('test.tsv')
-#p.plot_channel('val3')
-print(p.channel_names)
-print(p.units)
+	#p.plot_single_channel('thrust')
+	p.plot_single_channel('tank_press')
+	#p.show()
 
-print(p.channel_data['time'])
-print(p.channel_data['thrust'])
-p.plot_single_channel('thrust')
-#s.read_buffer(timeout=1)
+	print(p.integrate(channel='test', start=10, end=110))
 
-#print(s.packet_length)
 
