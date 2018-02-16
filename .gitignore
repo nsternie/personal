@@ -1,3 +1,4 @@
 hdl/*/work/
 *.log
 *.test
+*.wav
