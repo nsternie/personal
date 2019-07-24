@@ -1,12 +1,3 @@
 EESchema-DOCLIB  Version 2.0
 #
-$CMP LSM6DS33
-D 6 Axis Gyro and Accel
-K IMU, Gyro, Accel
-$ENDCMP
-#
-$CMP MAX4376FASA+
-D Current Sense Amplifier
-$ENDCMP
-#
 #End Doc Library
